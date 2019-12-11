@@ -5,6 +5,7 @@ let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oc
 const PORT = process.env.PORT || 3000;
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 const app = express();
 require('dotenv').config();
 app.use(cors());
@@ -12,11 +13,14 @@ app.use(cors());
 
 // LOCATION PATH
 app.get('/location', (request, response) => {
+  superagent.get(`https://www.google.com/maps/embed/v1/MODE?key=${process.env.GEOCODIJNE_API_KEY}`).then(response => {
+    console.log('body');
+  });
   const geoData = require('./data/geo.json');
   const location = geoData.results[0].geometry.location;
   const formAddr = geoData.results[0].formatted_address;
   const search_query = geoData.results[0].address_components[0].short_name.toLowerCase();
-  response.send(new Geolocation (search_query, formAddr, location));
+  response.send(new Geolocation (search_query, formAddr, location,));
 });
 // LOCATION CONSTRUCTOR FUNCTION
 function Geolocation (search_query,formAddr,location) {
