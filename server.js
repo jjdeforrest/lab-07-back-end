@@ -10,6 +10,23 @@ const app = express();
 require('dotenv').config();
 app.use(cors());
 
+app.get('/event', (request, response) => {
+  superagent.get(`https://www.eventbriteapi.com/v3/users/me/?token=${process.env.eventbrite}`).then(response => {
+    console.log('body');
+  });
+  const geoData = require('./data/geo.json');
+  const location = geoData.results[0].geometry.location;
+  const formAddr = geoData.results[0].formatted_address;
+  const search_query = geoData.results[0].address_components[0].short_name.toLowerCase();
+  response.send(new Eventbrite (search_query, formAddr, location,));
+});
+
+function Eventbrite (search_query, formAddr, location) {
+  this.search_query = search_query;
+  this.formatted_address = formAddr;
+  this.latitude = location['lat'];
+  this.longitude = location['lng'];
+}
 
 // LOCATION PATH
 app.get('/location', (request, response) => {
@@ -29,16 +46,8 @@ function Geolocation (search_query,formAddr,location) {
   this.latitude = location['lat'];
   this.longitude = location['lng'];
 }
-// WEATHER PATH
-// app.get('/weather', (request , response ) => {
-//   const reply = [];
-//   const weatherData = require('./data/darksky.json');
-//   const weatherArr = weatherData.daily.data
-//   for (let i = 0; i < weatherArr.length; i++) {
-//     reply.push(new Forecast (weatherArr[i].summary, weatherArr[i].time));
-//   }
-//   response.send( reply );
-// })
+
+
 
 app.get('/weather', (request , response ) => {
   superagent.get(`https://api.darksky.net/forecast/51b7774cf1581ac8c3d71236a475a32d/37.8267,-122.4233/MODE?key=${process.env.darksky}`).then(response => {
