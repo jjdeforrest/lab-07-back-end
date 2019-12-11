@@ -1,14 +1,14 @@
 # lab-07-repository
+name: joshua deforrest , annie pineda
+Number and name of feature: lab 07
 
-Number and name of feature: ________________________________
+Estimate of time needed to complete: 5 hours
 
-Estimate of time needed to complete: _____
+Start time: 900am
 
-Start time: _____
+Finish time: 2pm
 
-Finish time: _____
-
-Actual time needed to complete: _____
+Actual time needed to complete: 5 hours
 
 # Project Name
 
