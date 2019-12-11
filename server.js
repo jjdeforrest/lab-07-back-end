@@ -41,6 +41,10 @@ function Geolocation (search_query,formAddr,location) {
 // })
 
 app.get('/weather', (request , response ) => {
+  superagent.get(`https://api.darksky.net/forecast/51b7774cf1581ac8c3d71236a475a32d/37.8267,-122.4233/MODE?key=${process.env.darksky}`).then(response => {
+    console.log('body');
+  });
+
   const reply = [];
   const weatherData = require('./data/darksky.json');
   const weatherArr = weatherData.daily.data;
