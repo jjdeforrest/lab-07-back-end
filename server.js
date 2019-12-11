@@ -26,15 +26,40 @@ function Geolocation (search_query,formAddr,location) {
   this.longitude = location['lng'];
 }
 // WEATHER PATH
+// app.get('/weather', (request , response ) => {
+//   const reply = [];
+//   const weatherData = require('./data/darksky.json');
+//   const weatherArr = weatherData.daily.data
+//   for (let i = 0; i < weatherArr.length; i++) {
+//     reply.push(new Forecast (weatherArr[i].summary, weatherArr[i].time));
+//   }
+//   response.send( reply );
+// })
+
 app.get('/weather', (request , response ) => {
   const reply = [];
   const weatherData = require('./data/darksky.json');
-  const weatherArr = weatherData.daily.data
+  const weatherArr = weatherData.daily.data;
   for (let i = 0; i < weatherArr.length; i++) {
-    reply.push(new Forecast (weatherArr[i].summary, weatherArr[i].time));
-  }
-  response.send( reply );
-})
+        reply.push(new Forecast (weatherArr[i].summary, weatherArr[i].time));
+      }
+      let yo = reply.map(data);
+
+      function data (hello) {
+        return hello;
+      }
+      response.send(yo);
+});
+
+// app.get('/', (req, res) => {
+
+//   console.log('KLHEKLWJHRKSDJHF')
+
+//   res.send('WOW I AM ONLINE');
+// })
+
+
+
 // FORECAST CONSTRUCTOR FUNCTION
 function Forecast (summary, time) {
   this.forecast = summary;
