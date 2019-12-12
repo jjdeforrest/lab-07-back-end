@@ -1,22 +1,8 @@
 {
-  "name": "lab-06-repository",
+  "name": "lab-07-repository",
   "version": "1.0.0",
-  "description": "**Author**: Shane Gable **Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gableshane/lab-06-repository.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/gableshane/lab-06-repository/issues"
-  },
-  "homepage": "https://github.com/gableshane/lab-06-repository#readme",
+  "description": "name: joshua deforrest , annie pineda Number and name of feature: lab 07",
+  "main": "app.js",
   "dependencies": {
     "cors": "^2.8.5",
     "darksky": "^0.1.2",
@@ -24,5 +10,21 @@
     "eventbrite": "^1.2.2",
     "express": "^4.17.1",
     "superagent": "^5.1.2"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjdeforrest/lab-07-repository.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jjdeforrest/lab-07-repository/issues"
+  },
+  "homepage": "https://github.com/jjdeforrest/lab-07-repository#readme"
 }
