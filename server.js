@@ -1,101 +1,94 @@
 'use strict';
-// GLOBAL VARIABLES AND DEPENDENCIES
-let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun'];
-let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const PORT = process.env.PORT || 3000;
+
+
 const express = require('express');
 const cors = require('cors');
-const superagent = require('superagent');
-const app = express();
 require('dotenv').config();
+const app = express();
+const PORT = process.env.PORT || 3001;
+const superagent = require('superagent');
 app.use(cors());
 
-app.get('/location', (req, res) => {
-  superagent.get(`http://api.eventful.com/json/events/search?app_key=${process.env.eventbrite}=football&location=${req.query.data.formatted_query}&date=Future`).then(response => {
-    console.log(response);
-    console.log(JSON.parse(response.text).events.event[0]);
-    const firstEvent = JSON.parse(response.text).events.event[0];
-    const allEvents = JSON.parse(response.text).events.event;
-    const allData = allEvents.map(event => {
-      return {
-        'link': event.url,
-        'name': event.title,
-        'event_date': event.start_time,
-        'summary': event.description
-      };
-    });
-    res.send(allData);
-  });
-});
+// LOCATION DATA
 
-function Eventbrite(search_query, formAddr, location) {
-  this.search_query = search_query;
-  this.formatted_address = formAddr;
-  this.latitude = location['lat'];
-  this.longitude = location['lng'];
+function FormattedData(query, location) {
+  console.log(location)
+  this.search_query = query;
+  this.formatted_query = location.formatted_address;
+  this.latitude = location.geometry.location.lat;
+  this.longitude = location.geometry.location.lng;
 }
 
-// LOCATION PATH
 app.get('/location', (request, response) => {
-  superagent.get(`https://www.google.com/maps/embed/v1/MODE?key=${process.env.GEOCODING_API_KEY}`).then(response => {
-    console.log('body');
+  const searchquery = request.query.data;
+  const urlToVisit = `https://maps.googleapis.com/maps/api/geocode/json?address=${searchquery}&key=${process.env.GEOCODING_API_KEY}`;
+
+  superagent.get(urlToVisit).then(responseFromSuper => {
+    //console.log('stuff', responseFromSuper.body);
+
+    const geoData = responseFromSuper.body;
+
+    const location = geoData.results[0];
+
+
+    response.send(new FormattedData(searchquery, location));
+  }).catch(error => {
+    response.status(500).send(error.message);
+    console.error(error);
   });
-  const geoData = require('./data/geo.json');
-  const location = geoData.results[0].geometry.location;
-  const formAddr = geoData.results[0].formatted_address;
-  const search_query = geoData.results[0].address_components[0].short_name.toLowerCase();
-  response.send(new Geolocation(search_query, formAddr, location));
-});
-// LOCATION CONSTRUCTOR FUNCTION
-function Geolocation(search_query, formAddr, location) {
-  this.search_query = search_query;
-  this.formatted_address = formAddr;
-  this.latitude = location['lat'];
-  this.longitude = location['lng'];
+})
+
+// WEATHER DATA
+
+/// WEATHER ////
+
+function WeatherGetter(weatherValue) {
+  this.forecast = weatherValue.summary;
+  this.time = new Date(weatherValue.time * 1000).toDateString();
 }
-
-
-
 app.get('/weather', (request, response) => {
-  superagent.get(`https://api.darksky.net/forecast/51b7774cf1581ac8c3d71236a475a32d/37.8267,-122.4233/MODE?key=${process.env.darksky}`).then(response => {
-    console.log('body');
+  const weather_query = request.query.data
+
+  const urlToVisit = `https://api.darksky.net/forecast/${process.env.darksky}/${weather_query.latitude},${weather_query.longitude}`;
+  superagent.get(urlToVisit).then(responseFromSuper => {
+    //console.log('stuff', responseFromSuper.body);
+    const darkskyData = responseFromSuper.body;
+    const dailyData = darkskyData.daily.data.map(value => new WeatherGetter(value));
+    response.send(dailyData);
+
+  }).catch(error => {
+
+    console.error(error);
+    response.status(500).send(error.message);
   });
+})
 
-  const reply = [];
-  const weatherData = require('./data/darksky.json');
-  const weatherArr = weatherData.daily.data;
-  for (let i = 0; i < weatherArr.length; i++) {
-    reply.push(new Forecast(weatherArr[i].summary, weatherArr[i].time));
-  }
-  let yo = reply.map(data);
+// console.log('LOCATIONS END FIRING');
 
-  function data(hello) {
-    return hello;
-  }
-  response.send(yo);
+
+
+
+// EVENT DATA
+function Eventbrite(eventObj) {
+
+  this.name = eventObj.title
+  this.summary = eventObj.description
+  this.link = eventObj.url
+  this.event_date = eventObj.start_time
+}
+app.get('/events', (request, response) => {
+  const event_query = request.query.data
+  const urlToVisit = `http://api.eventful.com/json/events/search?location=${event_query.formatted_query}&date=Future&app_key=${process.env.eventbrite}`;
+  console.log(urlToVisit);
+
+  superagent.get(urlToVisit).then(responseFromSuper => {
+    const body = JSON.parse(responseFromSuper.text);
+    const events = body.events.event;
+    const normalizedEvents = events.map(eventObj => new Eventbrite(eventObj));
+    response.send(normalizedEvents);
+  }).catch(error => console.log(error))
+})
+
+app.listen(PORT, () => {
+  console.log('Port is working and listening  on port ' + PORT);
 });
-
-// app.get('/', (req, res) => {
-
-//   console.log('KLHEKLWJHRKSDJHF')
-
-//   res.send('WOW I AM ONLINE');
-// })
-
-
-
-// FORECAST CONSTRUCTOR FUNCTION
-function Forecast(summary, time) {
-  this.forecast = summary;
-  this.time = getDate(new Date(time));
-}
-// RETURNS FORMATTED DATE
-function getDate(time) {
-  let day = weekday[time.getDay()];
-  let month = months[time.getMonth()];
-  let date = time.getDate();
-  let year = time.getFullYear();
-  return `${day} ${month} ${date} ${year}`;
-}
-
-app.listen(PORT)
