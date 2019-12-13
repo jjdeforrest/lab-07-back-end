@@ -19,9 +19,12 @@ function FormattedData(query, location) {
   this.longitude = location.geometry.location.lng;
 }
 
-app.get('/location', (request, response) => {
-  const searchquery = request.query.data;
-  console.log('second', searchquery)
+app.get('/location', getLocation);
+app.get('/weather', getWeather);
+app.get('/events', getEvent);
+
+function getLocation (request, response) {
+  const searchquery = request.query.data
   const urlToVisit = `https://maps.googleapis.com/maps/api/geocode/json?address=${searchquery}&key=${process.env.GEOCODING_API_KEY}`;
   console.log('third', urlToVisit)
   superagent.get(urlToVisit).then(responseFromSuper => {
@@ -37,7 +40,7 @@ app.get('/location', (request, response) => {
     response.status(500).send(error.message);
     console.error(error);
   });
-})
+}
 
 // WEATHER DATA
 
@@ -47,10 +50,10 @@ function WeatherGetter(weatherValue) {
   this.forecast = weatherValue.summary;
   this.time = new Date(weatherValue.time * 1000).toDateString();
 }
-app.get('/weather', (request, response) => {
+function getWeather (request, response) {
   const weather_query = request.query.data
 
-  const urlToVisit = `https://api.darksky.net/forecast/${process.env.DARKSKY}/${weather_query.latitude},${weather_query.longitude}`;
+  const urlToVisit = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${weather_query.latitude},${weather_query.longitude}`;
   superagent.get(urlToVisit).then(responseFromSuper => {
     //console.log('stuff', responseFromSuper.body);
     const darkskyData = responseFromSuper.body;
@@ -62,7 +65,7 @@ app.get('/weather', (request, response) => {
     console.error(error);
     response.status(500).send(error.message);
   });
-})
+}
 
 // console.log('LOCATIONS END FIRING');
 
@@ -77,7 +80,8 @@ function Eventbrite(eventObj) {
   this.link = eventObj.url
   this.event_date = eventObj.start_time
 }
-app.get('/events', (request, response) => {
+
+function getEvent (request, response) {
   const event_query = request.query.data
   const urlToVisit = `http://api.eventful.com/json/events/search?location=${event_query.formatted_query}&date=Future&app_key=${process.env.EVENTBRITE}`;
   console.log(urlToVisit);
@@ -88,7 +92,7 @@ app.get('/events', (request, response) => {
     const normalizedEvents = events.map(eventObj => new Eventbrite(eventObj));
     response.send(normalizedEvents);
   }).catch(error => console.log(error))
-})
+}
 
 app.listen(PORT, () => {
   console.log('Port is working and listening  on port ' + PORT);
